@@ -9,8 +9,6 @@
 class Shader
 {
 private:
-    GLuint program = 0;
-
     std::unordered_map<std::string, GLint> uniform_map;
 
     GLint GetUniformLocation(std::string loc)
@@ -36,6 +34,8 @@ private:
         return true;
 
 public:
+    GLuint program = 0;
+
     ~Shader();
 
     void LoadShader(std::string vert_shader, std::string frag_shader);
