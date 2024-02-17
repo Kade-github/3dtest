@@ -2,10 +2,8 @@
 #include "includes/GLFW/glfw3.h"
 
 #include <iostream>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
+#include "Camera.h"
 #include "Shader.h"
 #include "Texture.h"
 
@@ -37,22 +35,18 @@ void main()
     FragColor = texture(ourTexture, TexCoord);
 })";
 
+Camera* camera = new Camera();
+
 float cWidth = 1280;
 float cHeight = 720;
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
 bool firstMouse = false;
 
 float lastX = 400, lastY = 300;
 
-float yaw = 0;
-float pitch = 0;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -79,13 +73,16 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     xoffset *= sensitivity;
     yoffset *= sensitivity;
 
-    yaw += xoffset;
-    pitch += yoffset;
+    float p = camera->pitch + yoffset;
+    if (p >= 89.0f)
+		p = 89.0f;
+    else if (p <= -89.0f)
+        p = -89.0f;
 
-    if (pitch > 89.0f)
-        pitch = 89.0f;
-    if (pitch < -89.0f)
-        pitch = -89.0f;
+    camera->yaw += xoffset;
+    camera->pitch = p;
+
+    camera->SetDirection();
 }
 
 void processInput(GLFWwindow* window)
@@ -96,13 +93,13 @@ void processInput(GLFWwindow* window)
     float cameraSpeed = 2.5f * deltaTime;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraSpeed * cameraFront;
+        camera->cameraPos += cameraSpeed * camera->cameraFront;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * cameraFront;
+        camera->cameraPos -= cameraSpeed * camera->cameraFront;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        camera->cameraPos -= glm::normalize(glm::cross(camera->cameraFront, camera->cameraUp)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        camera->cameraPos += glm::normalize(glm::cross(camera->cameraFront, camera->cameraUp)) * cameraSpeed;
 }
 
 int main()
@@ -240,6 +237,7 @@ int main()
 
     Texture* t = Texture::createWithImage("wall.jpg");
 
+
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
@@ -267,13 +265,7 @@ int main()
         s->Bind();
         t->Bind();
 
-        glm::vec3 direction;
-        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        direction.y = sin(glm::radians(pitch));
-        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        cameraFront = glm::normalize(direction);
-
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        view = camera->GetViewMatrix();
 
         int viewLoc = glGetUniformLocation(s->program, "view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));

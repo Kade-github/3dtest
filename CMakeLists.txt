@@ -25,7 +25,7 @@ find_library(
   PATHS
   lib)
 
-set(SOURCE_FILES main.cpp glad.c Shader.cpp Texture.cpp stbi.cpp)
+set(SOURCE_FILES main.cpp glad.c Shader.cpp Texture.cpp stbi.cpp "Camera.h")
 
 add_executable(3DTest ${SOURCE_FILES})
 
