@@ -6,12 +6,27 @@ project(
     LANGUAGES C CXX
 )
 
+include_directories(${CMAKE_SOURCE_DIR}/includes)
+link_directories(${CMAKE_SOURCE_DIR}/library)
+
 find_package(OpenGL REQUIRED)
 
-find_package(glfw3 REQUIRED)
+find_path(
+  GLFW_INCLUDE_DIR
+  NAMES
+  GLFW
+  PATHS
+  include)
+
+find_library(
+  GLFW_LIBRARY
+  NAMES
+  glfw glfw3 glfw3dll
+  PATHS
+  lib)
 
 set(SOURCE_FILES main.cpp glad.c Shader.cpp)
 
 add_executable(3DTest ${SOURCE_FILES})
 
-target_link_libraries(3DTest glfw)
+target_link_libraries(3DTest glfw3)

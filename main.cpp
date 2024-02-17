@@ -1,8 +1,26 @@
 #include "includes/glad/glad.h"
-#include <glfw/glfw3.h>
+#include "includes/GLFW/glfw3.h"
 #include <iostream>
 
 #include "Shader.h"
+
+const char* vertexShaderSource = R"(#version 330 core
+
+in vec3 aPos;
+
+void main()
+{
+    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+})";
+
+const char* fragmentShaderSource = R"(#version 330 core
+out vec4 FragColor;
+
+void main()
+{
+    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+} 
+)";
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -16,6 +34,8 @@ int main()
         std::cout << "Failed to setup GLFW" << std::endl;
         exit(EXIT_FAILURE);
     }
+
+    //
 
     glfwSetErrorCallback([](int error, const char *description)
                          { std::cout << "GLFW Error - " << error << " " << description << std::endl; });
@@ -59,7 +79,7 @@ int main()
         0.0f, 0.5f, 0.0f};
 
     Shader *s = new Shader();
-    s->LoadShader("Shaders/VertexShader.txt", "Shaders/FragmentShader.txt");
+    s->CompileShader(vertexShaderSource, fragmentShaderSource);
 
     unsigned int VBO;
     glGenBuffers(1, &VBO);

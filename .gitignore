@@ -13,3 +13,7 @@ _deps
 *.json
 
 ./includes/*
+.vs/*
+build/*
+library/*
+out/*
